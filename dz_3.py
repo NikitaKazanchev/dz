@@ -5,11 +5,11 @@ import time
 При каждом вызове декорируемой функции печатать имя функции и сколько она выполнялась.'''
 
 def calculating_the_working_time(func):
-    def wrapper(x, y):
+    def wrapper(*args, **cwargs):
         start = time.time()
-        res = func(x, y)
+        res = func(*args, **cwargs)
         end = time.time()
-        print(f'время выполнения функции {func} составляет {end-start}')
+        print(f'время выполнения функции {func.__name__} составляет {end-start}')
         return res
     return wrapper    
 
@@ -17,11 +17,36 @@ def calculating_the_working_time(func):
 def sum(x, y):
      return x + y
 
-sum(6, 4)
+@calculating_the_working_time
+def hello_world():
+    print('Hello world')
 
+sum(6, 4)
+hello_world()
 
 '''Задача 2
 Изучить функцию wraps (from functools import wraps) и применить её к декоратору из прошлой задачи'''
+
+from functools import wraps
+
+def calculating_the_working_time(func):
+    @wraps(func)
+    def wrapper(*args, **cwargs):
+        start = time.time()
+        res = func(*args, **cwargs)
+        end = time.time()
+        print(f'время выполнения функции {func.__name__} составляет {end-start}')
+        return res
+    return wrapper    
+
+@calculating_the_working_time
+def sum(x, y):
+    '''we make the addition of numbers'''
+    return x + y
+
+print(sum(6, 4))
+print(sum.__name__)
+print(sum.__doc__)
 
 
 '''Задача 3
