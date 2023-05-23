@@ -61,57 +61,45 @@ from functools import wraps
 Когда число запросов к функции превысит предел и пора будет снова высчитывать результат выполнения функции — сбросьте счётчик,
 выполните декорируемую функцию и заново сохраните результат её выполнения в переменную-кеш.'''
 
-from functools import lru_cache
-
-@lru_cache(maxsize=5)
-def calculating_the_working_time(func):
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        res = func(*args, **kwargs)
-        end = time.time()
-        print(f'время выполнения функции {func.__name__} составляет {end-start}')
-        return lru_cache  # - В этом варианте не понимаю как в место функци возвращать сохраненный результат
-    return wrapper    
-
-
-@calculating_the_working_time
-def sum(x, y=3):
-    '''we make the addition of numbers'''
-    return x + y
-
-sum(134, 13)
-
 def cached(func):
     cache = {}
-    counter = 0
-    counter += 1 # - ТУТ не понимаю как увеличивать счетчик при каждом запуске функции 
-    print(counter)
     @wraps(func)
     def wrapper(*args, **kwargs):
+        global counter
+        counter += 1
         cache_key = args + tuple(kwargs)
-        if cache_key in cache and counter < 5:
-            cache[cache_key] = func(*args, **kwargs)
-            return cache[cache_key]
+        if counter <= 5:
+            if cache_key not in cache:
+                res = func(*args, **kwargs)
+                cache[cache_key] = res
+                return res
         else:
-            res = func(*args, **kwargs)
-            cache[cache_key] = res
-            print(cache)
-            return res
+            counter = 0
+            cache.clear()
     return wrapper
     
-   
+counter = 0  
 @cached
 def sum(x, y=3):
     '''we make the addition of numbers'''
     return x + y
 
-sum(134, 13)
-
+print(sum(2, 2))
+print(sum(1, 8))
+print(sum(2, 2))
+print(sum(2, 5))
+print(sum(7, 2))
+print(sum(2, 5))
+print(sum(3, 2))
+print(sum(2, 5))
+print(sum(6, 2))
 
 
 '''Задача 4
 Улучшить декоратор из предыдущей задачи (кеширование результата).
 Добавить возможность передавать кол-во запусков, которые будут закэшированы, как аргумент декоратора'''
+
+
 
 '''Задача 5
 Улучшить декоратор из Задачи 4
