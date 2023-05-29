@@ -4,25 +4,25 @@ import time
 Создать декоратор, который вычисляет и выводит (через print) время работы декорируемой функции
 При каждом вызове декорируемой функции печатать имя функции и сколько она выполнялась.'''
 
-def calculating_the_working_time(func):
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        res = func(*args, **kwargs)
-        end = time.time()
-        print(f'время выполнения функции {func.__name__} составляет {end-start}')
-        return res
-    return wrapper    
+# def calculating_the_working_time(func):
+#     def wrapper(*args, **kwargs):
+#         start = time.time()
+#         res = func(*args, **kwargs)
+#         end = time.time()
+#         print(f'время выполнения функции {func.__name__} составляет {end-start}')
+#         return res
+#     return wrapper    
 
-@calculating_the_working_time
-def sum(x, y):
-     return x + y
+# @calculating_the_working_time
+# def sum(x, y):
+#      return x + y
 
-@calculating_the_working_time
-def hello_world():
-    print('Hello world')
+# @calculating_the_working_time
+# def hello_world():
+#     print('Hello world')
 
-sum(6, 4)
-hello_world()
+# sum(6, 4)
+# hello_world()
 
 '''Задача 2
 Изучить функцию wraps (from functools import wraps) и применить её к декоратору из прошлой задачи'''
@@ -100,26 +100,28 @@ print(sum(6, 2))
 Улучшить декоратор из предыдущей задачи (кеширование результата).
 Добавить возможность передавать кол-во запусков, которые будут закэшированы, как аргумент декоратора'''
 
-def cached(func):
-    cache = {}
-    counter = 0
-    @wraps(func)
-    def wrapper(number_launches,*args, **kwargs):
-        nonlocal counter
-        counter += 1
-        cache_key = str(args) + str(kwargs)
-        if counter <= number_launches:
-            if cache_key not in cache:
-                res = func(*args, **kwargs)
-                cache[cache_key] = res
-                return res
-        else:
-            counter = 0
-            cache.clear()
-    return wrapper
+def number_of_cached_runs(arg):   
+    def cached(func):
+        cache = {}
+        counter = 0
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            nonlocal counter
+            counter += 1
+            cache_key = str(args) + str(kwargs)
+            if counter <= arg:
+                if cache_key not in cache:
+                    res = func(*args, **kwargs)
+                    cache[cache_key] = res
+                    return res
+            else:
+                counter = 0
+                cache.clear()
+        return wrapper
+    return cached
     
   
-@cached
+@number_of_cached_runs(3)
 def sum(x, y=3):
     '''we make the addition of numbers'''
     return x + y
